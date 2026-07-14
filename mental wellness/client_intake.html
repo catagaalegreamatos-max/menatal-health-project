@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Client Intake — MindWell</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    :root {
+      --soft-bg: rgba(107, 40, 217, 0.04);
+      --soft-border: rgba(107, 40, 217, 0.12);
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .container {
+      width: min(860px, 100%);
+      margin: 0;
+    }
+
+    .glass-card {
+      overflow: hidden;
+      padding: 2rem 2.2rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.35rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 0.8rem 0.95rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font: inherit;
+      transition: all 0.25s ease;
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--secondary);
+      box-shadow: 0 0 0 4px rgba(123, 104, 238, 0.14);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary, .btn-secondary {
+      border: none;
+      border-radius: 999px;
+      padding: 0.8rem 1.3rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--secondary), var(--primary));
+      color: #fff;
+      box-shadow: 0 10px 22px rgba(123, 104, 238, 0.22);
+    }
+
+    .btn-secondary {
+      background: rgba(123, 104, 238, 0.1);
+      color: var(--dark-violet);
+    }
+
+    .btn-primary:hover, .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(123, 104, 238, 0.2);
+    }
+
+    .intro {
+      margin: 1rem 0 0;
+      min-height: 3rem;
+    }
+
+    .interview-card {
+      margin-top: 1rem;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .progress {
+      height: 10px;
+      background: rgba(226, 232, 240, 0.85);
+      border-radius: 999px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.08);
+    }
+
+    .progress > div {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--secondary), var(--dark-violet));
+      width: 0;
+      transition: width 0.45s ease;
+      border-radius: inherit;
+    }
+
+    .intro-card, .summary-card {
+      background: linear-gradient(135deg, var(--soft-bg), rgba(79, 142, 247, 0.06));
+      border: 1px solid var(--soft-border);
+      border-radius: 16px;
+      padding: 1rem 1.1rem;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+      animation: fadeInUp 0.45s ease;
+    }
+
+    .intro-card p, .summary-card p, .summary-card li {
+      color: var(--text-light);
+      line-height: 1.6;
+    }
+
+    .step-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .advice-list {
+      display: grid;
+      gap: 0.7rem;
+      margin-top: 0.9rem;
+    }
+
+    .advice-card {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(123, 104, 238, 0.14);
+      border-left: 4px solid var(--secondary);
+      border-radius: 12px;
+      padding: 0.8rem 0.95rem;
+    }
+
+    .advice-card h4 {
+      margin: 0 0 0.25rem 0;
+      color: var(--dark-violet);
+      font-size: 1rem;
+    }
+
+    .advice-card p {
+      margin: 0;
+      font-size: 0.95rem;
+    }
+    .typing::after {
+      content: '|';
+      display: inline-block;
+      margin-left: 2px;
+      color: var(--primary);
+      animation: blink 0.9s infinite;
+    }
+
+    .status-message {
+      margin-top: 1rem;
+      padding: 0.8rem 1rem;
+      border-radius: 12px;
+      background: rgba(95, 211, 166, 0.15);
+      color: #166534;
+      border: 1px solid rgba(95, 211, 166, 0.3);
+      animation: fadeInUp 0.35s ease;
+    }
+
+    .range-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 0.75rem;
+    }
+
+    input[type="range"] {
+      padding: 0;
+      accent-color: var(--secondary);
+    }
+
+    .pill {
+      min-width: 2.6rem;
+      text-align: center;
+      padding: 0.45rem 0.75rem;
+      border-radius: 999px;
+      background: var(--secondary);
+      color: white;
+      font-weight: 700;
+    }
+
+    .scale-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-top: 0.4rem;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="glass-card">
+      <div style="display:flex; justify-content:flex-end; margin-bottom:0.75rem;">
+        <a class="btn-secondary" href="index.html">Home</a>
+      </div>
+      <h2>Client Intake</h2>
+      <p class="subtitle">Please enter your information. You can then proceed to a short interview.</p>
+
+      <form id="intakeForm">
+        <div class="form-grid">
+          <div>
+            <label>Full name</label>
+            <input id="fullName" type="text" placeholder="First Last" required>
+          </div>
+          <div>
+            <label>Date of birth</label>
+            <input id="dob" type="date">
+          </div>
+          <div>
+            <label>Age</label>
+            <input id="age" type="number" min="0">
+          </div>
+          <div>
+            <label>Gender</label>
+            <select id="gender"><option value="">Prefer not to say</option><option>Female</option><option>Male</option><option>Non-binary</option><option>Other</option></select>
+          </div>
+
+          <div>
+            <label>Email</label>
+            <input id="email" type="email">
+          </div>
+          <div>
+            <label>Phone</label>
+            <input id="phone" type="tel">
+          </div>
+
+          <div class="full">
+            <label>Address</label>
+            <input id="address" type="text">
+          </div>
+
+          <div>
+            <label>Emergency contact name</label>
+            <input id="emName" type="text">
+          </div>
+          <div>
+            <label>Emergency contact phone</label>
+            <input id="emPhone" type="tel">
+          </div>
+
+          <div class="full">
+            <label>Current concerns (brief)</label>
+            <textarea id="concerns" rows="3"></textarea>
+          </div>
+
+          <div>
+            <label>Preferred contact method</label>
+            <select id="contactMethod"><option>Email</option><option>Phone</option><option>WhatsApp</option></select>
+          </div>
+          <div>
+            <label>Consent to store data</label>
+            <select id="consent"><option value="yes">Yes</option><option value="no">No</option></select>
+          </div>
+
+        </div>
+
+        <div style="margin-top:1rem; display:flex; flex-wrap:wrap; gap:0.75rem; align-items:center;">
+          <button type="button" class="btn-primary" id="introduceBtn">Next</button>
+          <button type="submit" class="btn-secondary">Save Intake</button>
+        </div>
+        <div id="saveMessage" class="status-message hidden" aria-live="polite"></div>
+      </form>
+
+      <div id="introArea" class="intro hidden"></div>
+
+      <div id="interview" class="interview-card hidden">
+        <div class="progress"><div id="progFill"></div></div>
+        <div id="questionArea" style="margin-top:1rem"></div>
+        <div class="step-nav">
+          <button class="btn-secondary" id="prevQ">Previous</button>
+          <button class="btn-primary" id="nextQ">Next</button>
+        </div>
+      </div>
+
+      <div id="resultArea" class="intro hidden"></div>
+
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {id:'stress', text:'How often do you feel overwhelmed or stressed?'},
+      {id:'anxiety', text:'How frequently do you experience feelings of anxiety or nervousness?'},
+      {id:'sleep', text:'How would you rate the quality and consistency of your sleep?'},
+      {id:'mood', text:'How often do you experience low mood, sadness, or lack of motivation?'},
+      {id:'social', text:'Do you have adequate emotional support from friends, family, or community?'},
+      {id:'physical', text:'How consistently do you engage in physical activity or self-care practices?'},
+      {id:'pressure', text:'How much pressure do you feel from work, studies, or performance expectations?'},
+      {id:'irritability', text:'How often do you feel irritable or easily annoyed?'},
+      {id:'concentration', text:'How often do you have trouble concentrating or staying focused?'},
+      {id:'hope', text:'How hopeful or positive do you feel about your future?'}
+    ];
+
+    let answers = {};
+    let current = 0;
+    let showResult = false;
+
+    function showStatus(message) {
+      const el = document.getElementById('saveMessage');
+      el.textContent = message;
+      el.classList.remove('hidden');
+      window.clearTimeout(showStatus.timer);
+      showStatus.timer = window.setTimeout(() => {
+        el.classList.add('hidden');
+      }, 2500);
+    }
+
+    function typeIntro(text, callback) {
+      const introArea = document.getElementById('introArea');
+      introArea.classList.remove('hidden');
+      introArea.innerHTML = '<div class="intro-card typing"></div>';
+      const target = introArea.querySelector('.intro-card');
+      let index = 0;
+      const interval = window.setInterval(() => {
+        target.textContent = text.slice(0, index + 1);
+        index += 1;
+        if (index >= text.length) {
+          window.clearInterval(interval);
+          if (callback) callback();
+        }
+      }, 24);
+    }
+
+    function renderQuestion(i) {
+      const q = questions[i];
+      const el = document.getElementById('questionArea');
+      const val = answers[q.id] || 3;
+      el.innerHTML = `
+        <div class="question-card">
+          <h3>${q.text}</h3>
+          <p>Choose a number from 1 to 5. A higher number means it feels more present right now.</p>
+          <div class="range-row">
+            <input type='range' min='1' max='5' value='${val}' id='qRange'>
+            <span class="pill" id='qLabel'>${val}</span>
+          </div>
+          <div class="scale-labels">
+            <span>Rarely</span>
+            <span>Often</span>
+          </div>
+        </div>`;
+
+      const rangeInput = document.getElementById('qRange');
+      const labelEl = document.getElementById('qLabel');
+      const updateLabel = () => {
+        labelEl.textContent = rangeInput.value;
+        answers[q.id] = parseInt(rangeInput.value, 10);
+      };
+
+      rangeInput.addEventListener('input', updateLabel);
+      updateLabel();
+      document.getElementById('progFill').style.width = Math.round(((i + 1) / questions.length) * 100) + '%';
+
+      window.setTimeout(() => {
+        const card = el.querySelector('.question-card');
+        if (card) {
+          card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        if (rangeInput) {
+          rangeInput.focus({ preventScroll: true });
+        }
+      }, 120);
+    }
+
+    document.getElementById('introduceBtn').addEventListener('click', () => {
+      const form = document.getElementById('intakeForm');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const data = collectIntake();
+      if (data.consent !== 'yes') {
+        showStatus('Consent is required before continuing.');
+        return;
+      }
+
+      localStorage.setItem('clientIntake', JSON.stringify(data));
+      form.classList.add('hidden');
+
+      const name = document.getElementById('fullName').value || 'Guest';
+      const intro = `Hello ${name}, I'm the MindWell Assistant. I'll ask a few thoughtful questions to understand how you're feeling. You can skip any question at any time.`;
+      document.getElementById('interview').classList.remove('hidden');
+      typeIntro(intro, () => {
+        renderQuestion(0);
+      });
+      document.getElementById('questionArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    document.getElementById('nextQ').addEventListener('click', () => {
+      const r = document.getElementById('qRange');
+      if (!r) return;
+      const qid = questions[current].id;
+      answers[qid] = parseInt(r.value, 10);
+      if (current < questions.length - 1) {
+        current += 1;
+        renderQuestion(current);
+      } else {
+        showResult = true;
+        showResultView();
+      }
+    });
+
+    document.getElementById('prevQ').addEventListener('click', () => {
+      if (current > 0) {
+        current -= 1;
+        renderQuestion(current);
+      }
+    });
+
+    function showResultView() {
+      const area = document.getElementById('resultArea');
+      const interview = document.getElementById('interview');
+      area.classList.remove('hidden');
+      interview.classList.add('hidden');
+      area.innerHTML = `
+        <div class="summary-card">
+          <h3>Why you may feel this way</h3>
+          <p>Here is a simple explanation of the possible reasons and what you can do next.</p>
+          ${buildAdviceHtml(answers)}
+          <div class="step-nav">
+            <button class="btn-secondary" id="backToInterview">Back</button>
+            <button class="btn-primary" id="finishFlow">Finish</button>
+          </div>
+        </div>`;
+
+      document.getElementById('backToInterview').addEventListener('click', () => {
+        area.classList.add('hidden');
+        interview.classList.remove('hidden');
+        renderQuestion(current);
+      });
+
+      document.getElementById('finishFlow').addEventListener('click', () => {
+        finishInterview();
+      });
+    }
+
+    function buildAdviceHtml(answers) {
+      const advice = [];
+      const push = (title, text) => advice.push(`<div class="advice-card"><h4>${title}</h4><p>${text}</p></div>`);
+
+      const highStress = (answers.stress || 0) >= 4 || (answers.pressure || 0) >= 4;
+      const highAnxiety = (answers.anxiety || 0) >= 4;
+      const poorSleep = (answers.sleep || 0) <= 2;
+      const lowMood = (answers.mood || 0) <= 2;
+      const lowSupport = (answers.social || 0) <= 2;
+      const lowActivity = (answers.physical || 0) <= 2;
+      const poorFocus = (answers.concentration || 0) <= 2;
+      const lowHope = (answers.hope || 0) <= 2;
+
+      if (highStress) {
+        push('Possible cause', 'Your body may be reacting to too much pressure, overload, or a lack of rest. This can make you feel mentally heavy, tense, or emotionally drained.');
+        push('What to do', 'Try one small reset today: take five slow breaths, reduce one task, and keep the rest of your day lighter than usual.');
+      }
+
+      if (highAnxiety) {
+        push('Possible cause', 'Anxiety often grows when the mind feels uncertain, unsafe, or overthinking many things at once.');
+        push('What to do', 'Use grounding: name five things you see, four you feel, three you hear, and slow your breathing for one minute.');
+      }
+
+      if (poorSleep) {
+        push('Possible cause', 'Poor sleep can make emotions feel stronger and thinking feel slower. It often makes stress, worry, and low mood worse.');
+        push('What to do', 'Set a bedtime routine, lower screen time before bed, and keep your room calm and dark.');
+      }
+
+      if (lowMood) {
+        push('Possible cause', 'Low mood may come from exhaustion, unresolved stress, loneliness, or loss of meaning in daily life.');
+        push('What to do', 'Choose one small task that gives you a sense of progress, even if it is just showering, tidying one corner, or taking a short walk.');
+      }
+
+      if (lowSupport) {
+        push('Possible cause', 'Feeling alone can intensify sadness, stress, and discouragement. Support from people around you can help a lot.');
+        push('What to do', 'Send a message to someone you trust, even if it is just to say you are having a hard day.');
+      }
+
+      if (lowActivity) {
+        push('Possible cause', 'When movement and self-care are low, the body may feel more tired, tense, and emotionally stuck.');
+        push('What to do', 'Do a light stretch, walk, or short self-care routine for 10 minutes.');
+      }
+
+      if (poorFocus) {
+        push('Possible cause', 'Poor concentration can happen when you are mentally overloaded, sleep-deprived, or emotionally overwhelmed.');
+        push('What to do', 'Break your work into small parts, focus on one task at a time, and take short breaks.');
+      }
+
+      if (lowHope) {
+        push('Possible cause', 'Feeling low in hope can happen when you feel stuck, discouraged, or like nothing is improving.');
+        push('What to do', 'Think of one small win from today and let that be enough for now.');
+      }
+
+      if (advice.length === 0) {
+        push('General guidance', 'Your responses suggest you are managing fairly well. Keep your routine steady, rest well, and reach out for support if things begin to feel heavier.');
+      }
+
+      if ((answers.stress || 0) >= 5 || (answers.mood || 0) <= 1 || (answers.hope || 0) <= 1) {
+        push('Immediate support', 'If you feel unsafe, think about hurting yourself, or feel unable to stay safe, contact emergency services or a crisis line right away and stay with someone you trust.');
+      }
+
+      return `<div class="advice-list">${advice.join('')}</div>`;
+    }
+
+    function finishInterview() {
+      const summaryItems = Object.entries(answers)
+        .map(([k, v]) => `<li>${k}: ${v}/5</li>`)
+        .join('');
+      const area = document.getElementById('resultArea');
+      area.innerHTML = `
+        <div class="summary-card">
+          <h3>Interview Summary</h3>
+          <ul>${summaryItems}</ul>
+          <p>Your responses are ready to save or share with a clinician.</p>
+          ${buildAdviceHtml(answers)}
+        </div>`;
+      const intake = collectIntake();
+      intake.interview = answers;
+      localStorage.setItem('clientIntake', JSON.stringify(intake));
+      document.getElementById('interview').classList.add('hidden');
+      showStatus('Interview summary saved locally.');
+    }
+
+    function collectIntake() {
+      return {
+        name: document.getElementById('fullName').value,
+        dob: document.getElementById('dob').value,
+        age: document.getElementById('age').value,
+        gender: document.getElementById('gender').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        address: document.getElementById('address').value,
+        emergency: {name: document.getElementById('emName').value, phone: document.getElementById('emPhone').value},
+        concerns: document.getElementById('concerns').value,
+        contactMethod: document.getElementById('contactMethod').value,
+        consent: document.getElementById('consent').value
+      };
+    }
+
+    document.getElementById('intakeForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const data = collectIntake();
+      if (data.consent !== 'yes') {
+        showStatus('Consent is required before saving.');
+        return;
+      }
+      localStorage.setItem('clientIntake', JSON.stringify(data));
+      showStatus('Intake saved locally.');
+    });
+  </script>
+</body>
+</html>

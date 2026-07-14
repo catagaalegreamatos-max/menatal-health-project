@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Assessment — MindWell</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .range-row { margin:1rem 0; }
+    label { display:block; margin-bottom:0.5rem; }
+  </style>
+</head>
+<body>
+  <header class="site-header"><h1>Short Assessment</h1></header>
+  <main class="container">
+    <form onsubmit="event.preventDefault(); submitAssessment();">
+      <div class="glass-card">
+        <h3>Mood</h3>
+        <div class="range-row">
+          <label for="moodRange">How would you rate your mood today?</label>
+          <input id="moodRange" type="range" min="0" max="10" value="5">
+          <div id="moodValue">5</div>
+        </div>
+
+        <h3>Stress</h3>
+        <div class="range-row">
+          <label for="stressRange">How stressed do you feel?</label>
+          <input id="stressRange" type="range" min="0" max="10" value="5">
+          <div id="stressValue">5</div>
+        </div>
+
+        <div class="button-container">
+          <button class="btn-primary" type="submit">Submit</button>
+          <a class="btn-secondary" href="index.html">Back</a>
+        </div>
+      </div>
+    </form>
+  </main>
+
+  <script src="assessment.js"></script>
+  <script>
+    const moodRange = document.getElementById('moodRange');
+    const moodVal = document.getElementById('moodValue');
+    const stressRange = document.getElementById('stressRange');
+    const stressVal = document.getElementById('stressValue');
+    moodRange.addEventListener('input', ()=> moodVal.innerText = moodRange.value);
+    stressRange.addEventListener('input', ()=> stressVal.innerText = stressRange.value);
+  </script>
+</body>
+</html>

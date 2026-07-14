@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Results — MindWell</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .hidden { display:none; }
+    .spinner { width:48px; height:48px; border-radius:50%; border:5px solid #eee; border-top-color:#4F8EF7; animation:spin 1s linear infinite; margin:1rem auto; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .text-center { text-align:center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="loading" class="text-center">
+        <div class="spinner"></div>
+        <p>AI is analyzing your well-being data...</p>
+    </div>
+
+    <div id="resultsContent" class="hidden">
+        <h3>Your Assessment Report</h3>
+        <div id="feedbackText"></div>
+        
+        <div class="recommendation-card">
+            <h4>Recommended Action</h4>
+            <p id="recommendedAction">Based on your input, we recommend speaking with a certified counselor.</p>
+            <a href="contact.html" class="btn">Find a School Counselor</a>
+        </div>
+    </div>
+  </div>
+
+  <script src="assessment.js"></script>
+  <script>
+    // Simulate AI thinking time
+    setTimeout(() => {
+        const raw = localStorage.getItem('userResults');
+        let message = 'No assessment data found.';
+        if (raw) {
+            try {
+                const data = JSON.parse(raw);
+                message = `Mood: ${data.mood} / Stress: ${data.stress}`;
+                // simple heuristic
+                const m = parseInt(data.mood || 0);
+                const s = parseInt(data.stress || 0);
+                if (s >= 8 || m <= 2) {
+                    document.getElementById('recommendedAction').innerText = 'Consider contacting a mental health professional for an evaluation.';
+                }
+            } catch(e) {
+                message = 'Error reading assessment data.';
+            }
+        }
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('resultsContent').style.display = 'block';
+        document.getElementById('feedbackText').innerText = message;
+    }, 3000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Express How You Feel | MindWell</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .express-container { max-width:700px; margin:2rem auto; }
+        textarea { width:100%; min-height:160px; padding:12px; border-radius:10px; border:1px solid var(--border); }
+        .controls { display:flex; gap:0.75rem; margin-top:1rem; }
+        .advice-output { margin-top:1rem; }
+        .task-list { list-style:none; padding:0; margin:1rem 0 0; }
+        .task-item { display:flex; align-items:center; gap:0.75rem; padding:0.6rem 0; border-bottom:1px solid rgba(255,255,255,0.08); }
+        .task-item input[type="checkbox"] { width:18px; height:18px; accent-color:#FF5FA2; }
+        .task-item input[type="text"] { flex:1; padding:0.5rem 0.7rem; border-radius:8px; border:1px solid var(--border); background:rgba(255,255,255,0.06); color:#fff; }
+        .task-item.done span { text-decoration:line-through; opacity:0.7; }
+    </style>
+</head>
+<body>
+    <script src="require_intake.js"></script>
+    <div class="container express-container">
+        <div class="glass-card header-section">
+            <div style="display:flex; justify-content:flex-end; margin-bottom:0.75rem;">
+                <a class="btn-secondary" href="index.html">Home</a>
+            </div>
+            <h1>Express How You Feel</h1>
+            <p class="subtitle">Write in your own words what's going on. Get immediate expert-style advice and options to share.</p>
+        </div>
+
+        <div class="glass-card">
+            <h3>Tell us how you feel</h3>
+            <textarea id="express-text" placeholder="Type how you feel, what's worrying you, any symptoms, or anything you'd like to share..."></textarea>
+
+            <div class="controls">
+                <button class="btn-primary" id="getAdviceBtn">Get Expert Advice</button>
+                <button class="btn-secondary" id="saveLocalBtn">Save Locally</button>
+                <button class="btn-secondary" id="clearBtn">Clear</button>
+            </div>
+
+            <div class="recommendation-item" style="margin-top:1rem;">
+                <h4>Daily tasks</h4>
+                <p>Write a task and check it when you finish it.</p>
+                <ul class="task-list" id="taskList"></ul>
+                <div class="controls" style="margin-top:0.75rem;">
+                    <input type="text" id="newTaskInput" placeholder="Add a task..." />
+                    <button class="btn-secondary" id="addTaskBtn">Add</button>
+                </div>
+            </div>
+
+            <div class="advice-output" id="adviceOutput" style="display:none;"></div>
+
+            <div class="controls" id="shareControls" style="display:none; margin-top:1rem;">
+                <button class="btn-primary" id="copyBtn">Copy & Share</button>
+                <button class="btn-secondary" id="emailBtn">Email Draft</button>
+                <button class="btn-secondary" id="waBtn">Send to ST. MARTIN'S (WhatsApp)</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="advice.js"></script>
+    <script>
+        // Expert-style rule set (same logic used in results page)
+        const expertRules = [
+            {keys: ['suicide','hurt','kill myself','end my life','want to die'], title: 'Immediate Safety', advice: 'If you have thoughts of harming yourself, seek emergency help immediately or call your local crisis line. Consider asking someone you trust to stay with you while you get help.'},
+            {keys: ['panic','panic attack','heart racing','short of breath'], title: 'Panic Symptoms', advice: 'Use grounding and paced breathing (4-4-4), and consider early consultation with a clinician for evaluation and teaching of panic-management techniques.'},
+            {keys: ['sleep','insomnia','can\'t sleep','awake at night'], title: 'Sleep Problems', advice: 'Maintain sleep hygiene; consider CBT-I (cognitive behavioural therapy for insomnia) if problems persist. A clinician can assess for sleep disorders.'},
+            {keys: ['anxious','anxiety','nervous','worry'], title: 'Anxiety Management', advice: 'Brief CBT strategies, relaxation training, and structured activity scheduling often help. If symptoms are frequent/severe, discuss therapy or medication options with a clinician.'},
+            {keys: ['depressed','sad','low mood','hopeless'], title: 'Low Mood / Depression', advice: 'Behavioral activation and psychotherapy (CBT, interpersonal therapy) are first-line; if severe or persistent, consider evaluation for antidepressant treatment by a physician.'},
+            {keys: ['focus','concentrate','attention','distracted'], title: 'Concentration Issues', advice: 'Assess sleep and stress first; structured routines, task segmentation (Pomodoro), and clinician assessment for attention disorders may be helpful.'}
+        ];
+
+        function analyzeText(text) {
+            const lower = text.toLowerCase();
+            const matches = [];
+            expertRules.forEach(rule => {
+                for (let k of rule.keys) {
+                    if (lower.includes(k)) {
+                        matches.push({title: rule.title, advice: rule.advice});
+                        break;
+                    }
+                }
+            });
+            return matches;
+        }
+
+        function getSuggestedActions(text) {
+            const lower = text.toLowerCase();
+            const suggestions = [];
+
+            if (lower.includes('stress') || lower.includes('overwhelmed') || lower.includes('pressure')) {
+                suggestions.push('Pause for 10 minutes, breathe slowly, and do one small task at a time.');
+            }
+            if (lower.includes('anxious') || lower.includes('panic') || lower.includes('nervous')) {
+                suggestions.push('Try the 4-4-4 breathing method and talk to someone you trust about what is bothering you.');
+            }
+            if (lower.includes('sleep') || lower.includes('insomnia') || lower.includes("can't sleep")) {
+                suggestions.push('Reduce screen time before bed and keep a simple nighttime routine.');
+            }
+            if (lower.includes('sad') || lower.includes('low mood') || lower.includes('hopeless')) {
+                suggestions.push('Do one comforting activity today and consider speaking with a counsellor or trusted adult.');
+            }
+            if (lower.includes('tired') || lower.includes('burnout') || lower.includes('exhausted')) {
+                suggestions.push('Rest, drink water, and reduce one unnecessary task today.');
+            }
+            if (suggestions.length === 0) {
+                suggestions.push('Start with one small step today: rest, write down your thoughts, and ask for support if needed.');
+            }
+
+            return suggestions;
+        }
+
+        function renderAdvice(matches, text) {
+            const output = document.getElementById('adviceOutput');
+            const response = generateAdviceResponse(text);
+            let html = '';
+
+            html += `<div class="recommendation-item"><h4>${escapeHtml(response.title)}</h4><p>${escapeHtml(response.summary)}</p></div>`;
+
+            if (matches.length > 0) {
+                matches.forEach(m => {
+                    html += `<div class="recommendation-item"><h4>${escapeHtml(m.title)}</h4><p>${escapeHtml(m.advice)}</p></div>`;
+                });
+            }
+
+            const suggestionList = response.actions.map(item => `<li>${escapeHtml(item)}</li>`).join('');
+            html += `<div class="recommendation-item"><h4>What you can do today</h4><ul class="help-list">${suggestionList}</ul></div>`;
+
+            html += `<div class="result-item" style="margin-top:1rem;"><strong>Your message:</strong><p style="margin:0.5rem 0;">${escapeHtml(text)}</p></div>`;
+            output.innerHTML = html;
+            output.style.display = 'block';
+            document.getElementById('shareControls').style.display = 'flex';
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+        }
+
+        document.getElementById('getAdviceBtn').addEventListener('click', function(){
+            const text = document.getElementById('express-text').value || '';
+            const matches = analyzeText(text);
+            renderAdvice(matches, text);
+        });
+
+        document.getElementById('saveLocalBtn').addEventListener('click', function(){
+            const text = document.getElementById('express-text').value || '';
+            localStorage.setItem('express_notes', text);
+            alert('Saved locally. You can retrieve it on this device.');
+        });
+
+        document.getElementById('clearBtn').addEventListener('click', function(){
+            if (confirm('Clear your text?')) {
+                document.getElementById('express-text').value = '';
+                document.getElementById('adviceOutput').style.display = 'none';
+                document.getElementById('shareControls').style.display = 'none';
+            }
+        });
+
+        // Sharing
+        function buildMessage(text) {
+            return `MindWell - Express Note:\n\n${text}\n\nContacts: ST. MARTIN'S MISSION HOSPITAL - +6343 734-6817, +6343 736-5205, +63 916-713-1279`;
+        }
+
+        document.getElementById('copyBtn').addEventListener('click', function(){
+            const text = document.getElementById('express-text').value || '';
+            const msg = buildMessage(text);
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(msg).then(()=> alert('Copied to clipboard.'));
+            } else { alert('Clipboard not available.'); }
+        });
+
+        document.getElementById('emailBtn').addEventListener('click', function(){
+            const text = document.getElementById('express-text').value || '';
+            const subject = encodeURIComponent('MindWell: Note from user');
+            const body = encodeURIComponent(buildMessage(text));
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        });
+
+        document.getElementById('waBtn').addEventListener('click', function(){
+            const text = document.getElementById('express-text').value || '';
+            const phone = '639167131279';
+            const url = `https://wa.me/${phone}?text=${encodeURIComponent(buildMessage(text))}`;
+            window.open(url, '_blank');
+        });
+
+        function saveTasks(tasks) {
+            localStorage.setItem('express_tasks', JSON.stringify(tasks));
+        }
+
+        function loadTasks() {
+            const raw = localStorage.getItem('express_tasks');
+            try {
+                return raw ? JSON.parse(raw) : [];
+            } catch {
+                return [];
+            }
+        }
+
+        function renderTasks() {
+            const taskList = document.getElementById('taskList');
+            const tasks = loadTasks();
+            taskList.innerHTML = '';
+
+            if (tasks.length === 0) {
+                taskList.innerHTML = '<li class="task-item"><span>No tasks yet. Add one above.</span></li>';
+                return;
+            }
+
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.className = `task-item ${task.done ? 'done' : ''}`;
+                li.innerHTML = `
+                    <input type="checkbox" ${task.done ? 'checked' : ''} data-index="${index}">
+                    <input type="text" value="${escapeHtml(task.text)}" data-index="${index}">
+                `;
+                taskList.appendChild(li);
+            });
+
+            taskList.querySelectorAll('input[type="checkbox"]').forEach(box => {
+                box.addEventListener('change', function () {
+                    const tasks = loadTasks();
+                    const i = Number(this.getAttribute('data-index'));
+                    tasks[i].done = this.checked;
+                    saveTasks(tasks);
+                    renderTasks();
+                });
+            });
+
+            taskList.querySelectorAll('input[type="text"]').forEach(input => {
+                input.addEventListener('change', function () {
+                    const tasks = loadTasks();
+                    const i = Number(this.getAttribute('data-index'));
+                    tasks[i].text = this.value.trim() || 'Untitled task';
+                    saveTasks(tasks);
+                    renderTasks();
+                });
+            });
+        }
+
+        document.getElementById('addTaskBtn').addEventListener('click', function () {
+            const input = document.getElementById('newTaskInput');
+            const text = input.value.trim();
+            if (!text) return;
+            const tasks = loadTasks();
+            tasks.push({ text, done: false });
+            saveTasks(tasks);
+            input.value = '';
+            renderTasks();
+        });
+
+        // load saved
+        window.addEventListener('load', function(){
+            const saved = localStorage.getItem('express_notes');
+            if (saved) document.getElementById('express-text').value = saved;
+            renderTasks();
+        });
+    </script>
+</body>
+</html>

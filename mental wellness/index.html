@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="style.css">
+    <title>Mental Wellness Assessment | MindWell</title>
+    <script src="require_intake.js"></script>
+</head>
+<body>
+    <div class="container py-5">
+        <!-- Header Section -->
+        <div class="glass-card header-section">
+            <h1>Mental Wellness Assessment</h1>
+            <p class="subtitle">Take a few minutes to evaluate your mental health across key dimensions. Your responses are confidential and help us provide personalized insights.</p>
+            <div class="button-container" style="margin-top:1rem; justify-content:center; border-top:none; padding-top:0;">
+                <a class="btn-secondary" href="express.html">Describe how you feel</a>
+                <a class="btn-secondary" href="client_intake.html">Start intake</a>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            <p class="progress-text">Question <span id="currentQuestion">1</span> of 10</p>
+        </div>
+
+        <div class="glass-card" id="question-container">
+            <!-- Question 1: Stress -->
+            <div class="question-card" id="q1">
+                <h3>Overall Stress Level</h3>
+                <p>How often do you feel overwhelmed or stressed by daily responsibilities?</p>
+                <div class="slider-container">
+                    <input type="range" min="1" max="5" value="3" onchange="saveAnswer('stress', this.value); updateSliderDisplay(this);">
+                    <div class="slider-labels">
+                        <span>Never</span>
+                        <span>Sometimes</span>
+                        <span>Often</span>
+                        <span>Very Often</span>
+                        <span>Always</span>
+                    </div>
+                    <div class="answer-display" id="display-stress">-</div>
+                    <div class="answer-display" id="display-stress">-</div>
+                    <div class="advice-display" id="advice-stress"></div>
+                </div>
+            </div>
+
+            <!-- Question 2: Anxiety -->
+            <div class="question-card" id="q2" style="display:none;">
+                <h3>Anxiety Levels</h3>
+                <p>How frequently do you experience feelings of anxiety or nervousness?</p>
+                <div class="slider-container">
+                    <input type="range" min="1" max="5" value="3" onchange="saveAnswer('anxiety', this.value); updateSliderDisplay(this);">
+                    <div class="slider-labels">
+                        <span>Never</span>
+                        <span>Rarely</span>
+                        <span>Sometimes</span>
+                        <span>Frequently</span>
+                        <span>Constantly</span>
+                    </div>
+                    <div class="answer-display" id="display-anxiety">-</div>
+                    <div class="answer-display" id="display-anxiety">-</div>
+                    <div class="advice-display" id="advice-anxiety"></div>
+                </div>
+            </div>
+
+            <!-- Question 3: Sleep Quality -->
+            <div class="question-card" id="q3" style="display:none;">
+                <h3>Sleep Quality</h3>
+                <p>How would you rate the quality and consistency of your sleep?</p>
+                <div class="slider-container">
+                    <input type="range" min="1" max="5" value="3" onchange="saveAnswer('sleep', this.value); updateSliderDisplay(this);">
+                    <div class="slider-labels">
+                        <span>Very Poor</span>
+                        <span>Poor</span>
+                        <span>Average</span>
+                        <span>Good</span>
+                        <span>Excellent</span>
+                    </div>
+                    <div class="answer-display" id="display-sleep">-</div>
+                    <div class="answer-display" id="display-sleep">-</div>
+                    <div class="advice-display" id="advice-sleep"></div>
+                </div>
+            </div>
+
+            <!-- Question 4: Mood -->
+            <div class="question-card" id="q4" style="display:none;">
+                <h3>Emotional Well-being</h3>
+                <p>How often do you experience low mood, sadness, or lack of motivation?</p>
+                <div class="slider-container">
+                    <input type="range" min="1" max="5" value="3" onchange="saveAnswer('mood', this.value); updateSliderDisplay(this);">
+                    <div class="slider-labels">
+                        <span>Never</span>
+                        <span>Rarely</span>
+                        <span>Sometimes</span>
+                        <span>Often</span>
+                        <span>Constantly</span>
+                    </div>
+                    <div class="answer-display" id="display-mood">-</div>
+                    <div class="answer-display" id="display-mood">-</div>
+                    <div class="advice-display" id="advice-mood"></div>
+                </div>
+            </div>
+
+            <!-- Question 5: Social Support -->
+            <div class="question-card" id="q5" style="display:none;">
+                <h3>Social Support</h3>
+                <p>Do you have adequate emotional support from friends, family, or community?</p>
+                <div class="slider-container">
+                    <input type="range" min="1" max="5" value="3" onchange="saveAnswer('social', this.value); updateSliderDisplay(this);">
+                    <div class="slider-labels">
+                        <span>Not at all</span>
+                        <span>Limited</span>
+                        <span>Moderate</span>
+                        <span>Good</span>
+                        <span>Excellent</span>
+                    </div>
+                    <div class="answer-display" id="display-social">-</div>
+                    <div class="answer-display" id="display-social">-</div>
+                    <div class="advice-display" id="advice-social"></div>
+                </div>
+            </div>
+
+            <!-- Question 6: Physical Activity -->
+            <div class="question-card" id="q6" style="display:none;">
+                <h3>Physical Activity & Self-Care</h3>
+                <p>How consistently do you engage in physical activity or self-care practices?</p>
+                <div class="slider-container">
+                    <input type="range" min="1" max="5" value="3" onchange="saveAnswer('physical', this.value); updateSliderDisplay(this);">
+                    <div class="slider-labels">
+                        <span>Never</span>
+                        <span>Rarely</span>
+                        <span>Sometimes</span>
+                        <span>Often</span>
+                        <span>Daily</span>
+                    </div>
+                    <div class="answer-display" id="display-physical">-</div>
+                    <div class="answer-display" id="display-physical">-</div>
+                    <div class="advice-display" id="advice-physical"></div>
+                </div>
+            </div>
+
+            <!-- Question 7: Work/Academic Pressure -->
+            <div class="question-card" id="q7" style="display:none;">
+                <h3>Work/Academic Pressure</h3>
+                <p>How much pressure do you feel from work, studies, or performance expectations?</p>
+                <div class="slider-container">
+                    <input type="range" min="1" max="5" value="3" onchange="saveAnswer('pressure', this.value); updateSliderDisplay(this);">
+                    <div class="slider-labels">
+                        <span>None</span>
+                        <span>Minimal</span>
+                        <span>Moderate</span>
+                        <span>High</span>
+                        <span>Extreme</span>
+                    </div>
+                    <div class="answer-display" id="display-pressure">-</div>
+                    <div class="answer-display" id="display-pressure">-</div>
+                    <div class="advice-display" id="advice-pressure"></div>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <!-- Optional free-text notes for user to express how they feel -->
+            <div class="question-card" id="notes-card" style="display:block;">
+                <h3>Anything else you'd like to share?</h3>
+                <p>Use this space to describe how you feel in your own words (optional).</p>
+                <textarea id="user-notes" placeholder="Type here..." rows="4" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border);"></textarea>
+            </div>
+
+            <div class="button-container">
+                <button class="btn-secondary" id="prevBtn" onclick="previousQuestion()" style="display:none;">← Previous</button>
+                <button class="btn-primary" id="nextBtn" onclick="nextQuestion()">Next →</button>
+            </div>
+
+            <div class="button-container" style="margin-top:1rem; justify-content:center;">
+                <a class="btn-secondary" href="research.html">View Research Study</a>
+            </div>
+        </div>
+    </div>
+    <!-- Additional questions added below -->
+        <!-- Question 8: Irritability -->
+        <div class="question-card" id="q8" style="display:none;">
+            <h3>Irritability & Anger</h3>
+            <p>How often do you feel irritable, short-tempered, or easily annoyed?</p>
+            <div class="slider-container">
+                <input type="range" min="1" max="5" value="3" onchange="saveAnswer('irritability', this.value); updateSliderDisplay(this);">
+                <div class="slider-labels">
+                    <span>Never</span>
+                    <span>Rarely</span>
+                    <span>Sometimes</span>
+                    <span>Often</span>
+                    <span>Constantly</span>
+                </div>
+                <div class="answer-display" id="display-irritability">-</div>
+                <div class="answer-display" id="display-irritability">-</div>
+                <div class="advice-display" id="advice-irritability"></div>
+            </div>
+        </div>
+
+        <!-- Question 9: Concentration -->
+        <div class="question-card" id="q9" style="display:none;">
+            <h3>Concentration & Focus</h3>
+            <p>How often do you have trouble concentrating or staying focused?</p>
+            <div class="slider-container">
+                <input type="range" min="1" max="5" value="3" onchange="saveAnswer('concentration', this.value); updateSliderDisplay(this);">
+                <div class="slider-labels">
+                    <span>Never</span>
+                    <span>Rarely</span>
+                    <span>Sometimes</span>
+                    <span>Often</span>
+                    <span>Constantly</span>
+                </div>
+                <div class="answer-display" id="display-concentration">-</div>
+                <div class="answer-display" id="display-concentration">-</div>
+                <div class="advice-display" id="advice-concentration"></div>
+            </div>
+        </div>
+
+        <!-- Question 10: Hopefulness -->
+        <div class="question-card" id="q10" style="display:none;">
+            <h3>Hopefulness & Outlook</h3>
+            <p>How hopeful or positive do you feel about your future and life goals?</p>
+            <div class="slider-container">
+                <input type="range" min="1" max="5" value="3" onchange="saveAnswer('hope', this.value); updateSliderDisplay(this);">
+                <div class="slider-labels">
+                    <span>Very Low</span>
+                    <span>Low</span>
+                    <span>Neutral</span>
+                    <span>Positive</span>
+                    <span>Very Positive</span>
+                </div>
+                <div class="answer-display" id="display-hope">-</div>
+                <div class="answer-display" id="display-hope">-</div>
+                <div class="advice-display" id="advice-hope"></div>
+            </div>
+        </div>
+    <script src="script.js"></script>
+</body>
+</html>

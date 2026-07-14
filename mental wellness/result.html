@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="style.css">
+    <title>Assessment Results | MindWell</title>
+    <script src="require_intake.js"></script>
+</head>
+<body>
+    <div class="container py-5">
+        <!-- Header Section -->
+        <div class="glass-card header-section">
+            <h1>Your Wellness Results</h1>
+            <p class="subtitle">Here's a personalized summary of your mental wellness assessment.</p>
+        </div>
+
+        <!-- Main Score Card -->
+        <div class="glass-card score-card">
+            <div class="score-container">
+                <div class="score-display">
+                    <div id="score-display">-</div>
+                    <p>Overall Score</p>
+                </div>
+                <div class="level-display">
+                    <h2 id="level-display">-</h2>
+                    <div class="level-indicator" id="levelIndicator"></div>
+                </div>
+            </div>
+            <div id="message-display" class="result-message"></div>
+        </div>
+
+        <!-- Risk Alert -->
+        <div id="risk-alert" class="glass-card" style="display:none;"></div>
+
+        <!-- Category Breakdown -->
+        <div class="glass-card">
+            <h3>Category Breakdown</h3>
+            <p class="subtitle">Your scores across different wellness dimensions:</p>
+            <div id="detailed-results" class="results-grid"></div>
+        </div>
+
+        <!-- User Notes -->
+        <div class="glass-card" id="user-notes-display" style="display:none;">
+            <h3>Your Notes</h3>
+            <p class="subtitle">What you shared about how you're feeling:</p>
+            <div id="notes-content" class="result-item"></div>
+        </div>
+
+        <!-- Why You May Feel This Way -->
+        <div class="glass-card">
+            <h3>Why You May Feel This Way</h3>
+            <p class="subtitle">A clearer explanation of the possible causes behind your patterns, along with gentle, practical next steps.</p>
+            <div id="why-you-feel-this-way" class="recommendations-list"></div>
+        </div>
+
+        <!-- Personalized Recommendations -->
+        <div class="glass-card">
+            <h3>Personalized Recommendations</h3>
+            <div id="recommendations" class="recommendations-list"></div>
+        </div>
+
+        <!-- Step-by-step Action Plan -->
+        <div class="glass-card">
+            <h3>Step-by-step Action Plan</h3>
+            <p class="subtitle">A practical, ordered plan to improve your wellbeing. Start at Step 1 and progress as you feel comfortable.</p>
+            <ol id="action-plan" class="recommendations-list"></ol>
+        </div>
+
+        <!-- Expert Prescription (Informational) -->
+        <div class="glass-card">
+            <h3>Suggested Clinical Actions (Expert Guidance)</h3>
+            <p class="subtitle">These are suggested, evidence-based actions clinicians commonly recommend. This is informational — consult a licensed professional for medical prescriptions.</p>
+            <div id="doctor-prescription" class="recommendations-list"></div>
+        </div>
+
+        <!-- Expert Doctor Advice (generated) -->
+        <div class="glass-card" id="expert-advice" style="display:none;">
+            <h3>Expert Doctor Advice</h3>
+            <p class="subtitle">Contextual advice generated from common clinical practice (for informational purposes).</p>
+            <div id="expert-advice-container" class="recommendations-list"></div>
+        </div>
+
+        <!-- Resources Section -->
+        <div class="glass-card resources-card">
+            <h3>Mental Health Resources</h3>
+            <div class="resources-grid">
+                <div class="resource-item">
+                    <h4>🧘 Meditation & Mindfulness</h4>
+                    <p>Apps like Calm, Headspace, and Insight Timer offer guided meditation to reduce stress and anxiety.</p>
+                </div>
+                <div class="resource-item">
+                    <h4>💪 Physical Activity</h4>
+                    <p>Exercise is proven to boost mood. Try yoga, running, gym, or any activity you enjoy.</p>
+                </div>
+                <div class="resource-item">
+                    <h4>🛏️ Sleep Hygiene</h4>
+                    <p>Maintain consistent sleep schedules, limit screen time before bed, and create a calm environment.</p>
+                </div>
+                <div class="resource-item">
+                    <h4>👥 Social Connection</h4>
+                    <p>Reach out to friends, family, or join communities that align with your interests.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Professional Help -->
+        <div class="glass-card help-card">
+            <h3>When to Seek Professional Help</h3>
+            <p>Consider speaking with a mental health professional if you:</p>
+            <ul class="help-list">
+                <li>Experience persistent sadness, anxiety, or stress for more than 2 weeks</li>
+                <li>Have difficulty functioning in daily activities (work, school, relationships)</li>
+                <li>Have thoughts of self-harm or suicide</li>
+                <li>Feel overwhelmed and don't know where to start</li>
+                <li>Need guidance on specific mental health concerns</li>
+            </ul>
+            <p class="help-resources"><strong>Crisis Resources:</strong> National Suicide Prevention Lifeline: 988 | Crisis Text Line: Text HOME to 741741</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="glass-card">
+            <div class="button-container">
+                <button class="btn-primary" onclick="retakeAssessment()">Retake Assessment</button>
+                <button class="btn-secondary" onclick="downloadResults()">Download Results</button>
+                <button class="btn-secondary" onclick="window.location.href='index.html'">Back to Home</button>
+            </div>
+        </div>
+
+        <!-- Share Notes -->
+        <div class="glass-card">
+            <h3>Share Your Notes</h3>
+            <p class="subtitle">Send what you wrote to yourself or to a clinician. Choose an option below.</p>
+            <div class="button-container">
+                <button class="btn-primary" onclick="copyNotes()">Copy Notes</button>
+                <button class="btn-secondary" onclick="emailNotes()">Email Draft</button>
+                <button class="btn-secondary" onclick="whatsappNotes()">Send via WhatsApp to ST. MARTIN'S</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="advice.js"></script>
+    <script>
+        // Check if user has assessment data before loading results
+        window.addEventListener('DOMContentLoaded', function() {
+            const data = localStorage.getItem('assessmentResults');
+            if (!data) {
+                alert('Please complete the assessment first!');
+                window.location.href = 'index.html';
+                return;
+            }
+            calculateResult();
+            generateRecommendations();
+        });
+
+        function retakeAssessment() {
+            if (confirm('Are you sure? Your current results will be replaced.')) {
+                localStorage.removeItem('assessmentResults');
+                window.location.href = 'index.html';
+            }
+        }
+
+        function downloadResults() {
+            const data = JSON.parse(localStorage.getItem('assessmentResults'));
+            const level = document.getElementById('level-display').innerText;
+            const score = document.getElementById('score-display').innerText;
+            
+            const text = `MindWell Assessment Results
+Date: ${new Date().toLocaleDateString()}
+
+Overall Score: ${score}/50
+Wellness Level: ${level}
+
+Category Scores:
+${Object.keys(data).map(key => `${key.charAt(0).toUpperCase() + key.slice(1)}: ${data[key]}/5`).join('\n')}
+
+Notes:
+${data.notes || ''}
+
+Remember: This assessment is for educational purposes. Please consult a mental health professional for diagnosis or treatment.`;
+
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'mindwell-results.txt';
+            a.click();
+        }
+
+        function generateRecommendations() {
+            const data = JSON.parse(localStorage.getItem('assessmentResults'));
+            const recommendations = [];
+            const notes = (data && data.notes) || '';
+            const currentLevel = document.getElementById('level-display').innerText || 'Good';
+            const messageDisplay = document.getElementById('message-display');
+            if (messageDisplay) {
+                messageDisplay.innerText = buildWellnessMessage(data, currentLevel, notes);
+            }
+
+            // Analyze each category and provide personalized recommendations
+            const categoryAnalysis = {
+                'stress': {
+                    name: 'Stress Management',
+                    high: 'Practice deep breathing exercises, break tasks into smaller steps, or consider stress-reducing activities like yoga.',
+                    low: 'You\'re managing stress well! Keep maintaining your current healthy habits.'
+                },
+                'anxiety': {
+                    name: 'Anxiety Control',
+                    high: 'Try grounding techniques (5-4-3-2-1 method), progressive muscle relaxation, or consult a therapist.',
+                    low: 'Great job managing anxiety! Continue what you\'re doing.'
+                },
+                'sleep': {
+                    name: 'Sleep Quality',
+                    high: 'Your sleep is healthy! Maintain your sleep routine and continue good sleep habits.',
+                    low: 'Establish a consistent bedtime routine, avoid screens 1 hour before bed, and keep your room cool and dark.'
+                },
+                'mood': {
+                    name: 'Mood & Emotional Health',
+                    high: 'Your mood is positive! Keep engaging in activities you love and maintaining social connections.',
+                    low: 'Consider activities that bring you joy, spend time with loved ones, or seek support from a counselor.'
+                },
+                'social': {
+                    name: 'Social Support',
+                    high: 'You have strong social connections! Keep nurturing your relationships.',
+                    low: 'Reach out to friends or family, join clubs or groups, or consider community activities.'
+                },
+                'physical': {
+                    name: 'Physical Activity & Self-Care',
+                    high: 'Great job staying active! Keep up your exercise routine and self-care practices.',
+                    low: 'Start with 20-30 minutes of activity you enjoy, practice self-care rituals, or explore new wellness activities.'
+                },
+                'pressure': {
+                    name: 'Pressure Management',
+                    high: 'You\'re handling pressure well! Maintain your coping strategies.',
+                    low: 'Set realistic goals, learn to say no, practice time management, or talk to someone about workload expectations.'
+                }
+                ,
+                'irritability': {
+                    name: 'Irritability & Anger',
+                    high: 'Practice grounding, pause before responding, and try stress reduction techniques.',
+                    low: 'Your emotional regulation appears good. Keep using calming strategies as needed.'
+                },
+                'concentration': {
+                    name: 'Concentration & Focus',
+                    high: 'Try focus techniques like the Pomodoro method, reduce distractions, and get regular breaks.',
+                    low: 'Your focus is strong. Maintain routines that support attention and rest.'
+                },
+                'hope': {
+                    name: 'Hope & Outlook',
+                    high: 'Maintain your optimism by setting achievable goals and practicing gratitude.',
+                    low: 'Consider exercises to build future-focused thinking, such as goal setting or talking with a counselor.'
+                }
+            };
+
+            // Build recommendations based on low scores
+            Object.keys(data).forEach(category => {
+                const value = parseInt(data[category]);
+                if (value <= 2 && categoryAnalysis[category]) {
+                    recommendations.push({
+                        category: categoryAnalysis[category].name,
+                        advice: categoryAnalysis[category].low
+                    });
+                }
+            });
+
+            // Display recommendations
+            const container = document.getElementById('recommendations');
+            if (recommendations.length > 0) {
+                const html = recommendations.map(rec => `
+                    <div class="recommendation-item">
+                        <h4>✓ ${rec.category}</h4>
+                        <p>${rec.advice}</p>
+                    </div>
+                `).join('');
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = '<p class="subtitle">You\'re doing great across all dimensions! Continue maintaining your healthy habits.</p>';
+            }
+
+            // Build an explanation section for why the user may be feeling this way
+            const whyContainer = document.getElementById('why-you-feel-this-way');
+            const whyItems = [];
+
+            if (data.stress <= 2) {
+                whyItems.push('<div class="recommendation-item"><h4>Stress</h4><p>Your stress may be rising because of pressure, too many responsibilities, or a lack of recovery time. The body often responds with tension, irritability, or mental fatigue.</p></div>');
+            }
+            if (data.anxiety <= 2) {
+                whyItems.push('<div class="recommendation-item"><h4>Anxiety</h4><p>Anxiety can grow when the mind feels uncertain, unsafe, or overloaded with worry. It may show up as racing thoughts, nervousness, or difficulty relaxing.</p></div>');
+            }
+            if (data.sleep <= 2) {
+                whyItems.push('<div class="recommendation-item"><h4>Sleep</h4><p>Poor sleep often makes emotions feel stronger and makes thinking and concentration harder. It can also increase stress, low mood, and irritability.</p></div>');
+            }
+            if (data.mood <= 2) {
+                whyItems.push('<div class="recommendation-item"><h4>Mood</h4><p>Low mood may come from emotional exhaustion, loneliness, unresolved stress, or a sense of being stuck. Small daily wins can help restore motivation.</p></div>');
+            }
+            if (data.social <= 2) {
+                whyItems.push('<div class="recommendation-item"><h4>Support</h4><p>When support feels limited, stress and sadness can become heavier. Connection with even one trusted person can make a difference.</p></div>');
+            }
+            if (data.physical <= 2) {
+                whyItems.push('<div class="recommendation-item"><h4>Movement</h4><p>Low movement and self-care can leave the body feeling tired and emotionally stuck. Gentle activity often improves energy and mood.</p></div>');
+            }
+            if (data.concentration <= 2) {
+                whyItems.push('<div class="recommendation-item"><h4>Focus</h4><p>Concentration problems often appear when stress, sleep problems, or emotional overload are present. Breaking tasks into smaller steps can help.</p></div>');
+            }
+            if (data.hope <= 2) {
+                whyItems.push('<div class="recommendation-item"><h4>Hope</h4><p>Low hope may happen when a person feels discouraged or unable to see progress. Building one small success can help regain momentum.</p></div>');
+            }
+
+            if (whyItems.length === 0) {
+                whyItems.push('<div class="recommendation-item"><h4>Balanced State</h4><p>Your responses suggest you are managing fairly well. Keep protecting your routine, sleep, and relationships.</p></div>');
+            }
+
+            whyContainer.innerHTML = whyItems.join('');
+
+            // Build a step-by-step action plan (general + personalized)
+            const planContainer = document.getElementById('action-plan');
+            const planSteps = [];
+
+            // Universal starter steps
+            planSteps.push('Step 1 — Immediate self-care: prioritize sleep, hydration, and a single 15-minute walk.');
+            planSteps.push('Step 2 — Daily routine: establish a simple morning and bedtime routine (wake/sleep times, 10–20 minutes of movement).');
+            planSteps.push('Step 3 — Mental skills: practice one grounding or breathing exercise daily (e.g., 5–4–3–2–1 grounding).');
+
+            // Add targeted steps for low categories
+            Object.keys(data).forEach(category => {
+                const value = parseInt(data[category]);
+                if (value <= 2) {
+                    switch(category) {
+                        case 'sleep':
+                            planSteps.push('Improve sleep hygiene: limit screens 1 hour before bed, keep room cool, and try a consistent sleep schedule.');
+                            break;
+                        case 'stress':
+                            planSteps.push('Reduce immediate stressors: list key tasks, delegate or drop non-essential items, and schedule short breaks.');
+                            break;
+                        case 'anxiety':
+                            planSteps.push('Use grounding and cognitive techniques: try 5-minute breathing or progressive muscle relaxation once or twice daily.');
+                            break;
+                        case 'mood':
+                            planSteps.push('Behavioral activation: schedule one pleasant or meaningful activity every day (15–30 minutes).');
+                            break;
+                        case 'social':
+                            planSteps.push('Reconnect: reach out to one friend or family member this week, or join a local group or class.');
+                            break;
+                        case 'physical':
+                            planSteps.push('Move more: start with 10–20 minutes of gentle exercise 3 times this week and build up.');
+                            break;
+                        case 'pressure':
+                            planSteps.push('Workload check: talk with a supervisor/teacher about expectations and break large tasks into smaller steps.');
+                            break;
+                        case 'irritability':
+                            planSteps.push('Anger management: practice a pause routine (count to 10, breathe) and log triggers for a week.');
+                            break;
+                        case 'concentration':
+                            planSteps.push('Focus training: try Pomodoro (25/5) sessions and reduce device notifications during work blocks.');
+                            break;
+                        case 'hope':
+                            planSteps.push('Build future focus: set one small achievable goal for the next 7 days and note progress daily.');
+                            break;
+                    }
+                }
+            });
+
+            // If severe overall, recommend prompt clinical contact
+            const level = document.getElementById('level-display').innerText;
+            if (level === 'Needs Attention') {
+                planSteps.push('Step X — Immediate support: contact a mental health professional, crisis line if needed, and consider a clinical evaluation.');
+            } else {
+                planSteps.push('Step Final — Review progress: after 2–4 weeks, review these steps and consider professional support if you have limited improvement.');
+            }
+
+            // Render plan steps
+            planContainer.innerHTML = planSteps.map(s => `<li class="recommendation-item"><p>${s}</p></li>`).join('');
+
+            // Build suggested clinical actions (informational, non-prescriptive)
+            const prescContainer = document.getElementById('doctor-prescription');
+            const prescItems = [];
+
+            // Basic suggested clinician actions based on categories
+            prescItems.push('<strong>Primary care:</strong> rule out medical contributors (thyroid, sleep apnea, medication side effects) and coordinate care.');
+            if (data.sleep <= 2) prescItems.push('<strong>Sleep specialist / CBT-I:</strong> consider cognitive-behavioural therapy for insomnia or sleep assessment.');
+            if (data.anxiety <= 2 || data.mood <= 2) prescItems.push('<strong>Psychologist / Therapist:</strong> evidence-based therapy (CBT, ACT) to address mood and anxiety symptoms.');
+            if (data.concentration <= 2) prescItems.push('<strong>Neuropsych or clinician:</strong> evaluate attention difficulties and consider strategies or assessment for ADHD if appropriate.');
+            if (data.irritability <= 2 || data.pressure <= 2) prescItems.push('<strong>Stress management & counseling:</strong> brief interventions focusing on coping, time management, and relaxation training.');
+            if (level === 'Needs Attention') prescItems.push('<strong>Psychiatrist evaluation:</strong> for diagnostic clarification and discussion of medication when evidence-based therapy alone is insufficient.');
+
+            prescItems.push('<em>Note:</em> The above are suggested clinical actions. Only a licensed clinician can provide a medical prescription. If you are considering medication, consult a psychiatrist or primary care provider.');
+
+            // Add local hospital contact information (user-provided)
+            prescItems.unshift('<strong>ST. MARTIN\u2019S MISSION HOSPITAL</strong>: +6343 734-6817, +6343 736-5205, +63 916-713-1279');
+
+            prescContainer.innerHTML = prescItems.map(item => `<div class="recommendation-item"><p>${item}</p></div>`).join('');
+
+            // Determine risk tier (Low / Moderate / High) from wellness level
+            const riskAlert = document.getElementById('risk-alert');
+            let riskTier = 'Low';
+            if (level === 'Needs Attention') {
+                riskTier = 'High';
+            } else if (level === 'Fair') {
+                riskTier = 'Moderate';
+            } else {
+                riskTier = 'Low';
+            }
+
+            // Compose messages per tier
+            if (riskTier === 'Low') {
+                riskAlert.style.display = 'block';
+                riskAlert.className = 'glass-card risk-alert low';
+                riskAlert.innerHTML = `
+                    <h3>Low Risk — Recommended Actions</h3>
+                    <p class="subtitle">You appear to be at low risk. Keep following your healthy routines and consider these maintenance tips:</p>
+                    <ul>
+                        <li>Maintain sleep and exercise routines.</li>
+                        <li>Practice brief daily mindfulness or grounding.</li>
+                        <li>Keep social connections and regular check-ins.</li>
+                    </ul>
+                `;
+            } else if (riskTier === 'Moderate') {
+                riskAlert.style.display = 'block';
+                riskAlert.className = 'glass-card risk-alert moderate';
+                riskAlert.innerHTML = `
+                    <h3>Moderate Risk — Action Plan</h3>
+                    <p class="subtitle">You show some areas of concern. Follow the action plan above and consider these next steps:</p>
+                    <ul>
+                        <li>Move prioritized items from your plan into a weekly schedule.</li>
+                        <li>Try 2–4 sessions of self-help techniques (guided CBT, structured sleep training).</li>
+                        <li>Consider booking a brief appointment with a counsellor or primary care clinician.</li>
+                    </ul>
+                `;
+            } else if (riskTier === 'High') {
+                riskAlert.style.display = 'block';
+                riskAlert.className = 'glass-card risk-alert high';
+                riskAlert.innerHTML = `
+                    <h3>High Risk — Immediate Action Recommended</h3>
+                    <p class="subtitle">Your results indicate higher risk. Please contact a healthcare professional promptly.</p>
+                        <ul>
+                            <li><strong>Call your nearest clinic or hospital</strong> for an urgent evaluation — for example, ST. MARTIN&rsquo;S MISSION HOSPITAL: <strong>+6343 734-6817</strong>, <strong>+6343 736-5205</strong>, <strong>+63 916-713-1279</strong>.</li>
+                            <li>If you are in danger or have thoughts of self-harm, call your local emergency number immediately.</li>
+                            <li>Bring this assessment (print or show on your device) to your appointment to help the clinician.</li>
+                        </ul>
+                        <p style="margin-top: 0.75rem;"><strong>Immediate resources:</strong> National emergency number: 911 (or your country’s emergency services). Crisis text lines and local hotlines are available in many regions.</p>
+                `;
+            }
+        }
+
+        // Generate Expert Doctor Advice from notes and assessment
+        const expertContainer = document.getElementById('expert-advice');
+        const expertList = document.getElementById('expert-advice-container');
+        const notesText = (JSON.parse(localStorage.getItem('assessmentResults')) || {}).notes || '';
+
+        const expertRules = [
+            {keys: ['suicide','hurt','kill myself','end my life','want to die'], title: 'Immediate Safety', advice: 'If you have thoughts of harming yourself, seek emergency help immediately or call your local crisis line. Consider asking someone you trust to stay with you while you get help.'},
+            {keys: ['panic','panic attack','heart racing','short of breath'], title: 'Panic Symptoms', advice: 'Use grounding and paced breathing (4-4-4), and consider early consultation with a clinician for evaluation and teaching of panic-management techniques.'},
+            {keys: ['sleep','insomnia','can\'t sleep','awake at night'], title: 'Sleep Problems', advice: 'Maintain sleep hygiene; consider CBT-I (cognitive behavioural therapy for insomnia) if problems persist. A clinician can assess for sleep disorders.'},
+            {keys: ['anxious','anxiety','nervous','worry'], title: 'Anxiety Management', advice: 'Brief CBT strategies, relaxation training, and structured activity scheduling often help. If symptoms are frequent/severe, discuss therapy or medication options with a clinician.'},
+            {keys: ['depressed','sad','low mood','hopeless'], title: 'Low Mood / Depression', advice: 'Behavioral activation and psychotherapy (CBT, interpersonal therapy) are first-line; if severe or persistent, consider evaluation for antidepressant treatment by a physician.'},
+            {keys: ['focus','concentrate','attention','distracted'], title: 'Concentration Issues', advice: 'Assess sleep and stress first; structured routines, task segmentation (Pomodoro), and clinician assessment for attention disorders may be helpful.'}
+        ];
+
+        const matched = [];
+        const lower = notesText.toLowerCase();
+        expertRules.forEach(rule => {
+            for (let k of rule.keys) {
+                if (lower.includes(k)) {
+                    matched.push(`<div class="recommendation-item"><h4>${rule.title}</h4><p>${rule.advice}</p></div>`);
+                    break;
+                }
+            }
+        });
+
+        // Also suggest expert items based on low category scores
+        Object.keys(data).forEach(cat => {
+            const v = parseInt(data[cat]);
+            if (v <= 2) {
+                if (cat === 'sleep') matched.push(`<div class="recommendation-item"><h4>Sleep Evaluation</h4><p>Consider referral for CBT-I or sleep study if symptoms persist despite sleep hygiene measures.</p></div>`);
+                if (cat === 'anxiety' || cat === 'mood') matched.push(`<div class="recommendation-item"><h4>Mental Health Treatment</h4><p>Evidence-based psychotherapy (CBT, ACT) is recommended; a psychiatrist can advise on medication when needed.</p></div>`);
+                if (cat === 'concentration') matched.push(`<div class="recommendation-item"><h4>Attention Assessment</h4><p>Clinician assessment for attentional disorders and medical contributors (thyroid, sleep) is suggested.</p></div>`);
+            }
+        });
+
+        // If nothing matched, provide general expert guidance
+        if (matched.length === 0) {
+            matched.push(`<div class="recommendation-item"><h4>General Clinical Advice</h4><p>Maintain routines, address sleep and activity, practice brief psychological strategies (breathing, grounding), and consult a clinician if concerns continue.</p></div>`);
+        }
+
+        expertList.innerHTML = matched.join('');
+        expertContainer.style.display = 'block';
+
+        // Sharing helpers
+        function buildShareMessage() {
+            const data = JSON.parse(localStorage.getItem('assessmentResults')) || {};
+            const score = document.getElementById('score-display').innerText || '-';
+            const level = document.getElementById('level-display').innerText || '-';
+            const notes = data.notes || '';
+            let msg = `MindWell Assessment Results\nScore: ${score}/50\nLevel: ${level}\n\nNotes:\n${notes}\n\nContacts: ST. MARTIN'S MISSION HOSPITAL - +6343 734-6817, +6343 736-5205, +63 916-713-1279`;
+            return msg;
+        }
+
+        function copyNotes() {
+            const msg = buildShareMessage();
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(msg).then(() => {
+                    alert('Notes copied to clipboard.');
+                }).catch(() => {
+                    alert('Copy failed. You can manually select and copy the notes.');
+                });
+            } else {
+                alert('Clipboard API not available in this browser.');
+            }
+        }
+
+        function emailNotes() {
+            const msg = buildShareMessage();
+            const subject = encodeURIComponent('MindWell Assessment Results');
+            const body = encodeURIComponent(msg);
+            // No recipient prefilled so user can choose clinician email
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        }
+
+        function whatsappNotes() {
+            const msg = buildShareMessage();
+            // Use the hospital mobile number provided (+63 916-713-1279) in international format without +
+            const phone = '639167131279';
+            const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
+        }
+    </script>
+</body>
+</html>
